@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <script src="http://code.jquery.com/jquery-latest.min.js"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?v=3.exp"></script>
+    <script src="http://cooper-union-maps-proxy.herokuapp.com/js/draw.js"></script>
+    <script>
+
+      $(document).ready(function(){
+
+        //getting the data from instagram
+        $.getJSON("http://cooper-union-instagram-proxy.herokuapp.com/search/tag/dream?count=100", function(response){
+
+          //create the placeholder for valid images
+          var instagramPositions = [];
+
+          //looping through the response from instagram
+          for(var i=0; i<response.length; i++) {
+            // $("body").append("<img src="+response[i].images.thumbnail.url+" />");
+
+            //if the current response has location data
+            if(response[i].location != null) {
+
+              //construct the photoMarker object
+              var photoMarker = {
+                'title': response[i].caption.text,
+                'map': new google.maps.LatLng(response[i].location.latitude, response[i].location.longitude),
+                'link':response[i].link,
+                'html':"<img src="+response[i].images.thumbnail.url+" />"
+              }
+
+              //push the photoMarker object onto instagramPositions array
+              instagramPositions.push(photoMarker);
+            } //end of "if the photo has location data"
+
+          } //end of the for loop, iterating through the photos
+
+          //set up the map configuration
+          var mapOptions = {
+            zoom: 2,
+            center: new google.maps.LatLng(40.7293, -73.9906),
+          };
+
+          draw('map', mapOptions, instagramPositions);
+        });
+
+      });
+
+    </script>
+    <style>
+      #map {
+        height:600px;
+        width:1000px;
+        text-align: center;
+        margin-left: auto;
+        margin-right: auto;
+
+      }
+
+      #title {
+        font-family: Helvetica, sans-serif;
+        color: white;
+        text-align: center;
+        margin-left: auto;
+        margin-right: auto;
+        letter-spacing: 150%;
+        font-size: 100px;
+        text-shadow: 2px 2px blue;
+        padding: 15px;
+
+      }
+
+      html{
+        background-image: url("data:image/jpeg;base64,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");
+        background-repeat: no-repeat;
+        background-size: 3000px;
+      }
+    </style>
+  </head>
+  <body>
+
+    <div>
+      <h1 id="title" > WHERE, IS THE    DREAM? </h1>
+    <div>
+      <div id="map"></div>
+
+
+
+  </body>
+</html>
